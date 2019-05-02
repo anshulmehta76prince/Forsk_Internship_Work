@@ -383,10 +383,69 @@ html = re.get(url).content
 
 data = pd.read_html(html)
 
-new_data = data[0]
+new_data = data[0].head(20)
 
-new_data.dropna(inplace=True)
 
+new_data.drop([5,6,7,8],axis=1,inplace=True)
+new_data.drop([4],axis=1,inplace=True)
+
+
+new_data.columns = ['Rank','City','State','Population']
+
+new_data.drop([0],axis=0,inplace=True)
+
+new_data.isna()
+
+#new_data.to_csv('New Microsoft Excel Worksheet.csv', sep='\t', encoding='utf-8')
+
+germany_post_code_data = pd.read_csv('zuordnung_plz_ort.csv')
+
+germany_post_code_data.columns = ['ID','City','Post_Code','State']
+
+
+list_ = list(new_data['City'])
+
+new_list = []
+
+with open('C://Users//PRINCE//Desktop//Forks_Internship_Work//Code_Challenge//Regular_Expression//zuordnung_plz_ort.csv',"r",encoding="utf8") as f:
+    for line in f:
+        l = line.split(',')
+        new_list.append(l)
+ 
+
+
+dict_ = {}
+l1=[]
+l2=[]
+
+
+for i in list_:
+    for j in new_list:
+        if i == j[1]:
+            l1.append(j[2])
+            l2=l1[:]
+            dict_[i]=l2
+    del  l1[:]
+
+
+for key in dict_:
+    print(key+"{",dict_[key],"}")
+    
+    
+
+''' Using GroupBy method of pandas '''
+
+merged_data = pd.merge(new_data,germany_post_code_data,on='City')
+
+merged_data.drop(['Rank','State_x','Population','ID','State_y'],axis=1,inplace=True)
+
+merged_data['Post_Code'] = merged_data['Post_Code'].apply(str)
+
+new_merged_data = merged_data.groupby('City')['Post_Code'].apply(','.join).reset_index()
+
+print(new_merged_data.to_dict())
+
+    
 
 
 
